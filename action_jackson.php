@@ -78,9 +78,11 @@ function getUserActions($posts) {
     }
 
     foreach($posts as $post) {
-        foreach($actions as $action) {
-            if($action->objectId == $post->ID) {
-                $post->actions[] = $action;
+        if(isset($actions) && !empty($actions)) {
+            foreach($actions as $action) {
+                if($action->objectId == $post->ID) {
+                    $post->actions[] = $action;
+                }
             }
         }
     }

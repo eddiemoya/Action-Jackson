@@ -106,9 +106,9 @@ add_action('wp_ajax_nopriv_add_user_action', 'addUserAction');
 
 
 function asdf($user) {
-    echo 'in asdf <pre>';
-    var_dump($user);
-    exit;
+//    echo 'in asdf <pre>';
+//    var_dump($user);
+//    exit;
 }
 
 add_filter('pre_user_query', 'asdf');

@@ -68,17 +68,19 @@ function getUserActions($posts) {
 
     $userActions = $ajQuery->getUserActions($ids, $userId, $page, 10);
 
-    foreach($userActions as $userAction) {
-        foreach($actions as $action) {
-            if($action->id == $userAction->object_id) {
-                $action->user = $userAction;
-                $action->user = new UserAction($userAction);
+    if(isset($userAction) && !emptY($userAction)) {
+        foreach($userActions as $userAction) {
+            foreach($actions as $action) {
+                if($action->id == $userAction->object_id) {
+                    $action->user = $userAction;
+                    $action->user = new UserAction($userAction);
+                }
             }
         }
     }
 
     foreach($posts as $post) {
-        if(isset($actions) && !empty($actions)) {
+        if(isset($userAction) && !emptY($userAction)) {
             foreach($actions as $action) {
                 if($action->objectId == $post->ID) {
                     $post->actions[] = $action;

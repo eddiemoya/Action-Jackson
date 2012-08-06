@@ -76,29 +76,29 @@
         return $posts;
     }
     add_filter('posts_results', 'getUserActionsOnPosts');
-    add_filter('pre_get_posts', 'dont_suppress_filters');
 
     function dont_suppress_filters($query){
         $query->query_vars['suppress_filters'] = false;
         return $query;
     }
+    add_filter('pre_get_posts', 'dont_suppress_filters');
 
     function addUserAction() {
         $ajQuery = new ActionJacksonQuery();
-        //$result = $ajQuery->addUserAction((int)$_POST['id'], $_POST['type'], $_POST['userAction'], $_POST['subtype'], (int)$_POST['user']);
-        $result = $ajQuery->addUserAction('332', 'post', 'upvote', 'question', 1);
+        $result = $ajQuery->addUserAction((int)$_POST['id'], $_POST['type'], $_POST['userAction'], $_POST['subtype'], (int)$_POST['user']);
+        //$result = $ajQuery->addUserAction('332', 'post', 'upvote', 'question', 1);
 
         echo json_encode($result);
         exit;
     }
     add_action('wp_ajax_add_user_action', 'addUserAction');
     add_action('wp_ajax_nopriv_add_user_action', 'addUserAction');
-addUserAction();
 
     /**
      * Get all actions a user has performed on a set of comments
      *
      * @param $comments array of comments
+     * @return $comments array
      */
     function getMyActionsOnComments($comments) {
         if(!isset($comments) || empty($comments)) {
@@ -110,9 +110,13 @@ addUserAction();
 
             get_currentuserinfo();
 
-            $ajQuery = new ActionJacksonQuery();w
+            $ajQuery = new ActionJacksonQuery();
             $postActions = $ajQuery->getPostAction('posts', $ids, null, null, null, null, null, false);
+
+            return $comments;
         }
+
+        return $comments;
     }
     add_filter('comments_array', 'getMyActionsOnComments');
 

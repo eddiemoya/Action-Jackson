@@ -50,7 +50,7 @@
             $actions[] = new PostAction($postAction);
         }
 
-        $userActions = $ajQuery->getUserActions($ids, $userId, $page, 10);
+        $userActions = $ajQuery->getUserActions($userId, null, $ids, null, $page, 10);
 
         if(isset($userAction) && !emptY($userAction)) {
             foreach($userActions as $userAction) {

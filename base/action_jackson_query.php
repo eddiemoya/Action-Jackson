@@ -66,7 +66,7 @@
             }
         }
 
-        public function getUserActions($user_id, $object_id=null, $page=1, $limit=10) {
+        public function getUserActions($user_id, $object_type=null, $object_id=null, $object_subtype=null, $page=1, $limit=10, $returnSQL=false) {
             if(
                 ((isset($objId) && is_int($objId) && $objId > 0 ) && (!isset($objType) || is_null($objType) || $objType == ''))
                 ||
@@ -92,23 +92,36 @@
             $argCount = count($args);
 
             $query = 'SELECT
-                            ua.*
+                            ua.*, pa.*
                         FROM
                             '.$this->_wpdb->prefix.'user_actions ua
+                        JOIN
+                            '.$this->_wpdb->prefix.'post_actions pa
+                                ON
+                                    ua.object_id=pa.post_action_id
                         WHERE ';
+
+            $args = $this->_unsetNulls($args);
+            $argCount = count($args);
 
             foreach($args as $key=>$arg) {
                 if(!is_null($arg) && !empty($arg)) {
                     $arg = is_string($arg) ? '"'.$arg.'"' : $arg;
 
+                    $tableAlias = ($key == 'user_id') ? 'ua' : 'pa';
+
                     if(is_array($arg)) {
-                        $query .= ($i < ($argCount - 1)) ? $key.' IN ('.implode(',', $arg).') AND ' : $key.' IN ('.implode(',', $arg).')';
+                        $query .= ($i < ($argCount - 1)) ? $tableAlias.'.'.$key.' IN ('.implode(',', $arg).') AND ' : $tableAlias.'.'.$key.' IN ('.implode(',', $arg).')';
                     } else {
-                        $query .= ($i < ($argCount - 1)) ? $key.'='.$arg.' AND ' : $key.'='.$arg;
+                        $query .= ($i < ($argCount - 1)) ? $tableAlias.'.'.$key.'='.$arg.' AND ' : $tableAlias.'.'.$key.'='.$arg;
                     }
 
                     $i++;
                 }
+            }
+
+            if($returnSQL === true) {
+                return $query;
             }
 
             $query .= ' LIMIT '.$startLimit.','.$limit;
@@ -254,7 +267,6 @@
                     $arg = is_string($arg) ? '"'.$arg.'"' : $arg;
 
                     $tableAlias = ($key == 'user_id') ? 'ua' : 'pa';
-                    echo $key.' '.$tableAlias.'<br/>';
 
                     $query .= ($i < ($argCount - 1)) ? $tableAlias.'.'.$key.'='.$arg.' AND ' : $tableAlias.'.'.$key.'='.$arg;
 

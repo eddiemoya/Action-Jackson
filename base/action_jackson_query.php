@@ -113,8 +113,6 @@
 
             $query .= ' LIMIT '.$startLimit.','.$limit;
 
-            echo $query;
-
             return $this->_wpdb->get_results($query);
         }
 

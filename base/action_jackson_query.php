@@ -142,6 +142,7 @@
          */
         public function getPostAction($object_type, $object_id, $object_subtype=null, $post_action_id=null, $action_type=null, $limit=10, $page=1, $limited=true) {
             $args = get_defined_vars();
+            $i = 0;
 
             if(isset($post_action_id) && (int)$post_action_id > 0) {
                 unset($args['obejct_type']);

@@ -132,9 +132,9 @@
                  `action_total` int(11) NOT NULL,
                  `last_modified` int(11) NOT NULL,
                  PRIMARY KEY (`post_action_id`)
-               ) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=10;';
+               ) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=10;
 
-        $sql .= 'CREATE TABLE IF NOT EXISTS `'.$wpdb->prefix.'user_actions` (
+               CREATE TABLE IF NOT EXISTS `'.$wpdb->prefix.'user_actions` (
                   `user_action_id` int(11) NOT NULL AUTO_INCREMENT,
                   `user_id` bigint(20) NOT NULL,
                   `object_id` int(11) NOT NULL,

@@ -105,12 +105,8 @@
      * @return $comments array
      */
     function getMyActionsOnComments($comments) {
-        $comments = get_comments(array('post_id' => $post->ID));
-
-        $comment_type = get_post_type( $post->ID ) == 'question' ? 'answer' : 'comment';
-
         if(!isset($comments) || empty($comments)) {
-            return $comments;
+            return;
         }
 
         if ( is_user_logged_in() ) {
@@ -161,12 +157,16 @@
                 }
             }
 
+//            echo '<pre>';
+//            var_dump($comments);
+//            exit;
+
             return $comments;
         }
 
         return $comments;
     }
-    add_filter('comments_array', 'getMyActionsOnComments');
+    add_filter('the_comments', 'getMyActionsOnComments');
 
     function action_jackson_install() {
         global $wpdb, $action_jackson_db_version;

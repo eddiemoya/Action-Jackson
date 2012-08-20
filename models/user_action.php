@@ -15,5 +15,6 @@
             $this->added = (int)$userAction->action_added;
             $this->id = (int)$userAction->user_action_id;
             $this->userId = (int)$userAction->user_id;
+            $this->action_id = (int)$userAction->action_id;
         }
     }

@@ -56,7 +56,7 @@
             foreach($userActions as $userAction) {
                 foreach($actions as $action) {
                     if($action->id == $userAction->object_id) {
-                        $action->user = $userAction;
+                        $action->userAction = $userAction;
                         $action->user = new UserAction($userAction);
                     }
                 }
@@ -84,8 +84,12 @@
     add_filter('pre_get_posts', 'dont_suppress_filters');
 
     function addUserAction() {
+        global $current_user;
+        get_currentuserinfo();
+        $userId = isset($current_user->ID) && $current_user->ID > 0 ? $current_user->ID : 0;
+
         $ajQuery = new ActionJacksonQuery();
-        $result = $ajQuery->addUserAction((int)$_POST['id'], $_POST['type'], $_POST['userAction'], $_POST['subtype'], (int)$_POST['user']);
+        $result = $ajQuery->addUserAction((int)$_POST['id'], $_POST['type'], $_POST['name'], $_POST['sub_type'], $userId);
         //$result = $ajQuery->addUserAction('332', 'post', 'upvote', 'question', 1);
 
         echo json_encode($result);
@@ -101,6 +105,10 @@
      * @return $comments array
      */
     function getMyActionsOnComments($comments) {
+        $comments = get_comments(array('post_id' => $post->ID));
+
+        $comment_type = get_post_type( $post->ID ) == 'question' ? 'answer' : 'comment';
+
         if(!isset($comments) || empty($comments)) {
             return $comments;
         }
@@ -110,8 +118,48 @@
 
             get_currentuserinfo();
 
+            $page = (isset($_GET['paged']) && !empty($_GET['paged'])) ? $_GET['paged'] : 1;
+
+            foreach($comments as $comment) {
+                $ids[] = $comment->comment_ID;
+            }
+
             $ajQuery = new ActionJacksonQuery();
-            $postActions = $ajQuery->getPostAction('posts', $ids, null, null, null, null, null, false);
+            $postActions = $ajQuery->getPostAction('comments', $ids, null, null, null, null, null, false);
+
+            $ids = array();
+
+            foreach($postActions as $postAction) {
+                $ids[] = $postAction->object_id;
+
+//                $actions[] = new PostAction($postAction);
+            }
+
+            $userActions = $ajQuery->getUserActions($userId, null, $ids, null, $page, 10);
+
+            foreach($userActions as $userAction) {
+                $actions[] = new PostAction($userAction);
+            }
+
+            if(isset($userActions) && !emptY($userActions)) {
+                foreach($userActions as $userAction) {
+                    foreach($actions as $action) {
+                        if($current_user->ID == $action->user && $action->id == $userAction->action_id) {
+                            $action->user = new UserAction($userAction);
+                        }
+                    }
+                }
+            }
+
+            foreach($comments as $comment) {
+                if(isset($actions) && !empty($actions)) {
+                    foreach($actions as $action) {
+                        if($action->objectId == $comment->comment_ID) {
+                            $comment->actions[] = $action;
+                        }
+                    }
+                }
+            }
 
             return $comments;
         }

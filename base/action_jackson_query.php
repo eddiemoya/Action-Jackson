@@ -25,16 +25,18 @@
             }
 
             $actions = $this->_getUserAction($userId, $action, $objId, $objType);
+
             if(isset($actions) && !empty($actions)) {
                 return 1;
             }
 
             //_addPostAction($objId, $objType, $action, $objectSubtype=null) {
-            $result = $this->_addPostAction($objId, $objType, $action, $objSubtype);
+
+            $result = $this->_addPostAction($objId, $objType, $action, $objSubType);
             if(isset($result) && $result > 0) {
                 $args = array(
                     'user_id' => $userId,
-                    'object_id' => $result,
+                    'action_id' => $result,
                     'action_added' => strtotime('now')
                	);
 
@@ -66,15 +68,7 @@
             }
         }
 
-        public function getUserActions($user_id, $object_type=null, $object_id=null, $object_subtype=null, $page=1, $limit=10, $returnSQL=false) {
-            if(
-                ((isset($objId) && is_int($objId) && $objId > 0 ) && (!isset($objType) || is_null($objType) || $objType == ''))
-                ||
-                ((!isset($objId) ||!is_int($objId) || $objId <= 0) && (isset($objType) && is_string($objType) && $objType != ''))
-            ) {
-                Throw new Exception('If you want to get a user\'s action based an object, you need to pass in an object type and object ID!');
-            }
-
+        public function getUserActions($user_id=null, $object_type=null, $object_id=null, $object_subtype=null, $page=1, $limit=10, $returnSQL=false) {
             /**
              * This must be here, otherwise other non-argument variables will be included.
              */
@@ -98,7 +92,7 @@
                         JOIN
                             '.$this->_wpdb->prefix.'post_actions pa
                                 ON
-                                    ua.object_id=pa.post_action_id
+                                    ua.action_id=pa.post_action_id
                         WHERE ';
 
             $args = $this->_unsetNulls($args);
@@ -187,7 +181,7 @@
             return $this->_wpdb->get_results($query);
         }
 
-        private function _addPostAction($objId, $objType, $action, $objectSubtype=null) {
+        private function _addPostAction($objId, $objType, $action, $objSubType=null) {
             $result = $this->getPostAction($objType, $objId, null, null, $action);
             if(isset($result) && !empty($result)) {
                 $updated = $this->_updatePostAction($result[0]->post_action_id, null, null, null, $action, $result[0]->action_total + 1);
@@ -207,7 +201,6 @@
 
             $result = $this->_wpdb->insert($this->_wpdb->prefix.'post_actions', $args);
             if($result == 1) {
-                echo 'the id is '.$this->_wpdb->insert_id.'<br/>';
                 return $this->_wpdb->insert_id;
             }
         }
@@ -247,7 +240,7 @@
             return $this->_wpdb->update($this->_wpdb->prefix.'post_actions', $args, array('post_action_id' => $actionId), $formats, array('%d'));
         }
 
-        private function _getUserAction($user_id, $action_type, $object_id, $object_type) {
+        private function _getUserAction($user_id, $action_type, $object_id, $object_type, $object_subtype=null) {
             $args = get_defined_vars();
 
             $query = 'SELECT

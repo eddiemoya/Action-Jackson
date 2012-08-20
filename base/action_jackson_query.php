@@ -118,7 +118,7 @@
                 return $query;
             }
 
-            $query .= ' LIMIT '.$startLimit.','.$limit;
+//            $query .= ' LIMIT '.$startLimit.','.$limit;
 
             return $this->_wpdb->get_results($query);
         }

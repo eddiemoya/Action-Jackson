@@ -142,6 +142,8 @@
                     foreach($actions as $action) {
                         if($current_user->ID == $action->user && $action->id == $userAction->action_id) {
                             $action->user = new UserAction($userAction);
+                        } else {
+                            $action->user = null;
                         }
                     }
                 }

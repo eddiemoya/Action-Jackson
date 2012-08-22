@@ -25,7 +25,7 @@
         global $current_user;
 
         $existingIds = array();
-        $userId = (is_user_logged_in()) ? $current_user->ID : '1';
+        $userId = (is_user_logged_in()) ? $current_user->ID : '0';
 
         /**
          * Check to see if there is anything in the $_GET
@@ -45,18 +45,19 @@
         $ids = array();
 
         foreach($postActions as $postAction) {
-            $ids[] = $postAction->post_action_id;
-
-            $actions[] = new PostAction($postAction);
+            $ids[] = $postAction->object_id;
         }
 
         $userActions = $ajQuery->getUserActions($userId, null, $ids, null, $page, 10);
 
-        if(isset($userAction) && !emptY($userAction)) {
+        foreach($userActions as $userAction) {
+            $actions[] = new PostAction($userAction);
+        }
+
+        if(isset($userActions) && !emptY($userActions)) {
             foreach($userActions as $userAction) {
                 foreach($actions as $action) {
-                    if($action->id == $userAction->object_id) {
-                        $action->userAction = $userAction;
+                    if($current_user->ID == $action->user && $action->id == $userAction->action_id) {
                         $action->user = new UserAction($userAction);
                     }
                 }
@@ -64,7 +65,7 @@
         }
 
         foreach($posts as $post) {
-            if(isset($userAction) && !emptY($userAction)) {
+            if(isset($actions) && !empty($actions)) {
                 foreach($actions as $action) {
                     if($action->objectId == $post->ID) {
                         $post->actions[] = $action;
@@ -123,12 +124,11 @@
             $ajQuery = new ActionJacksonQuery();
             $postActions = $ajQuery->getPostAction('comments', $ids, null, null, null, null, null, false);
 
+            $actions = array();
             $ids = array();
 
             foreach($postActions as $postAction) {
                 $ids[] = $postAction->object_id;
-
-//                $actions[] = new PostAction($postAction);
             }
 
             $userActions = $ajQuery->getUserActions($userId, null, $ids, null, $page, 10);
@@ -142,8 +142,6 @@
                     foreach($actions as $action) {
                         if($current_user->ID == $action->user && $action->id == $userAction->action_id) {
                             $action->user = new UserAction($userAction);
-                        } else {
-                            $action->user = null;
                         }
                     }
                 }
@@ -158,10 +156,6 @@
                     }
                 }
             }
-
-//            echo '<pre>';
-//            var_dump($comments);
-//            exit;
 
             return $comments;
         }

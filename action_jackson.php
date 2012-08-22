@@ -168,7 +168,7 @@
 
         return $comments;
     }
-    add_filter('the_comments', 'getMyActionsOnComments');
+    add_filter('the_comments', 'getMyActionsOnComments', 9);
 
     function action_jackson_install() {
         global $wpdb, $action_jackson_db_version;

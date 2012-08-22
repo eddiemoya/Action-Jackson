@@ -27,10 +27,21 @@
             $actions = $this->_getUserAction($userId, $action, $objId, $objType);
 
             if(isset($actions) && !empty($actions)) {
-                return 1;
-            }
+//              ($actionId, $objId=null, $objType=null, $objSubType=null, $action=null, $action_total=null) {
+                $total = $actions[0]->action_total - 1;
 
-            //_addPostAction($objId, $objType, $action, $objectSubtype=null) {
+                if($this->_updatePostAction($actions[0]->post_action_id, null, null, null, null, (string)$total)) {
+                    if($this->_deleteUserAction($actions[0]->post_action_id, $userId)) {
+                        return 'deactivated';
+                    } else {
+                        echo 'did not delete';
+                        exit;
+                    }
+                } else {
+                    echo 'did not update';
+                    exit;
+                }
+            }
 
             $result = $this->_addPostAction($objId, $objType, $action, $objSubType);
             if(isset($result) && $result > 0) {
@@ -42,7 +53,7 @@
 
                 $result = $this->_wpdb->insert($this->_wpdb->prefix.'user_actions', $args);
 
-                return $result;
+                return 'activated';
             } else {
                 return false;
             }
@@ -240,6 +251,10 @@
             return $this->_wpdb->update($this->_wpdb->prefix.'post_actions', $args, array('post_action_id' => $actionId), $formats, array('%d'));
         }
 
+        private function _deleteUserAction($action_id, $user_id) {
+            return $this->_wpdb->query('DELETE FROM '.$this->_wpdb->prefix.'user_actions WHERE user_id='.$user_id.' AND action_id='.$action_id);
+        }
+
         private function _getUserAction($user_id, $action_type, $object_id, $object_type, $object_subtype=null) {
             $args = get_defined_vars();
 
@@ -250,7 +265,7 @@
                         JOIN
                             '.$this->_wpdb->prefix.'post_actions pa
                                 ON
-                                    ua.object_id=pa.post_action_id
+                                    ua.action_id=pa.post_action_id
                         WHERE ';
 
             $args = $this->_unsetNulls($args);
@@ -274,6 +289,10 @@
         private function _unsetNulls($args) {
             foreach($args as $key=>$arg) {
                 if(is_null($arg) || empty($arg)) {
+                    if($arg === "0") {
+                        continue;
+                    }
+
                     unset($args[$key]);
                 }
             }

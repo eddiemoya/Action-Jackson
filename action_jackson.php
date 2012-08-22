@@ -91,7 +91,6 @@
 
         $ajQuery = new ActionJacksonQuery();
         $result = $ajQuery->addUserAction((int)$_POST['id'], $_POST['type'], $_POST['name'], $_POST['sub_type'], $userId);
-        //$result = $ajQuery->addUserAction('332', 'post', 'upvote', 'question', 1);
 
         echo json_encode($result);
         exit;

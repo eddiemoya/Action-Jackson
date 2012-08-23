@@ -48,30 +48,38 @@
             $ids[] = $postAction->object_id;
         }
 
-        $userActions = $ajQuery->getUserActions($userId, null, $ids, null, $page, 10);
+        if(is_user_logged_in()) {
+            $userActions = $ajQuery->getUserActions($userId, null, $ids, null, $page, 10);
 
-        foreach($userActions as $userAction) {
-            $actions[] = new PostAction($userAction);
-        }
-
-        if(isset($userActions) && !emptY($userActions)) {
             foreach($userActions as $userAction) {
-                foreach($actions as $action) {
-                    if($current_user->ID == $action->user && $action->id == $userAction->action_id) {
-                        $action->user = new UserAction($userAction);
-                    }
-                }
+                $actions[] = new PostAction($userAction);
             }
-        }
 
-        foreach($posts as $post) {
-            if(isset($actions) && !empty($actions)) {
-                foreach($actions as $action) {
-                    if($action->objectId == $post->ID) {
-                        $post->actions[] = $action;
+            if(isset($userActions) && !emptY($userActions)) {
+                foreach($userActions as $userAction) {
+                    foreach($actions as $action) {
+                        if($current_user->ID == $action->user && $action->id == $userAction->action_id) {
+                            $action->user = new UserAction($userAction);
+                        }
                     }
                 }
             }
+
+            foreach($posts as $post) {
+                if(isset($actions) && !empty($actions)) {
+                    foreach($actions as $action) {
+                        if($action->objectId == $post->ID) {
+                            $post->actions[] = $action;
+                        }
+                    }
+                }
+            }
+        } else {
+//            $actionCookie = json_decode(urldecode(stripslashes($_COOKIE['action'])), true);
+//
+//            var_dump($_COOKIE['action']);
+//
+//            exit;
         }
 
         return $posts;

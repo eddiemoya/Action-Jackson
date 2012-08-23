@@ -15,7 +15,7 @@
                                     $objType,
                                     $action,
                                     $objSubType=null,
-                                    $userId=1) {
+                                    $userId=null) {
             if((int)$objId <= 0 || is_null($objId)) {
                 Throw new Exception('You need to pass an object ID!');
             }
@@ -31,29 +31,35 @@
                 $total = $actions[0]->action_total - 1;
 
                 if($this->_updatePostAction($actions[0]->post_action_id, null, null, null, null, (string)$total)) {
-                    if($this->_deleteUserAction($actions[0]->post_action_id, $userId)) {
-                        return 'deactivated';
-                    } else {
-                        echo 'did not delete';
-                        exit;
+                    if(isset($userId) && ($userId > 0 || $userId != '')) {
+                        if($this->_deleteUserAction($actions[0]->post_action_id, $userId)) {
+                            return 'deactivated';
+                        }
                     }
-                } else {
-                    echo 'did not update';
-                    exit;
+
+                    return 'deactivated-out';
+                }
+            } else {
+                if(is_user_logged_in()) {
+
                 }
             }
 
             $result = $this->_addPostAction($objId, $objType, $action, $objSubType);
             if(isset($result) && $result > 0) {
-                $args = array(
-                    'user_id' => $userId,
-                    'action_id' => $result,
-                    'action_added' => strtotime('now')
-               	);
+                if(isset($userId) && ($userId > 0 || $userId != '')) {
+                    $args = array(
+                        'user_id' => $userId,
+                        'action_id' => $result,
+                        'action_added' => strtotime('now')
+                    );
 
-                $result = $this->_wpdb->insert($this->_wpdb->prefix.'user_actions', $args);
+                    $result = $this->_wpdb->insert($this->_wpdb->prefix.'user_actions', $args);
 
-                return 'activated';
+                    return 'activated';
+                }
+
+                return 'activated-out';
             } else {
                 return false;
             }

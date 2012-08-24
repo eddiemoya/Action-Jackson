@@ -76,7 +76,7 @@
             }
         } else {
 //            $actionCookie = json_decode(urldecode(stripslashes($_COOKIE['action'])), true);
-//unset($_COOKIE);
+//
 //            var_dump($_COOKIE['action']);
 //
 //            exit;

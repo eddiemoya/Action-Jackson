@@ -33,6 +33,12 @@
                 if($this->_updatePostAction($actions[0]->post_action_id, null, null, null, null, (string)$total)) {
                     if(isset($userId) && ($userId > 0 || $userId != '')) {
                         if($this->_deleteUserAction($actions[0]->post_action_id, $userId)) {
+                            $return = array(
+                                'name'           => $action,
+                                'post_action_id' => $action[0]->post_action_id,
+                                'result'         => 'deactivated'
+                            );
+
                             return 'deactivated';
                         }
                     }

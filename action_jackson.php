@@ -75,11 +75,11 @@
                 }
             }
         } else {
-            $actionCookie = json_decode(urldecode(stripslashes($_COOKIE['action'])), true);
-
-            var_dump($_COOKIE['action']);
-
-            exit;
+//            $actionCookie = json_decode(urldecode(stripslashes($_COOKIE['action'])), true);
+//unset($_COOKIE);
+//            var_dump($_COOKIE['action']);
+//
+//            exit;
         }
 
         return $posts;

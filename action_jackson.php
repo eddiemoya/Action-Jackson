@@ -64,28 +64,22 @@
                     }
                 }
             }
-        } else {
-            $actions = json_decode(urldecode(stripslashes($_COOKIE['actions'])), true);
 
-            foreach($actions as $action) {
-                $ids[] = $action->id;
-            }
-
-            echo '<pre>';
-            var_dump($ids);
-            exit;
-
-            exit;
-        }
-
-        foreach($posts as $post) {
-            if(isset($actions) && !empty($actions)) {
-                foreach($actions as $action) {
-                    if($action->objectId == $post->ID) {
-                        $post->actions[] = $action;
+            foreach($posts as $post) {
+                if(isset($actions) && !empty($actions)) {
+                    foreach($actions as $action) {
+                        if($action->objectId == $post->ID) {
+                            $post->actions[] = $action;
+                        }
                     }
                 }
             }
+        } else {
+//            $actionCookie = json_decode(urldecode(stripslashes($_COOKIE['action'])), true);
+//
+//            var_dump($_COOKIE['action']);
+//
+//            exit;
         }
 
         return $posts;

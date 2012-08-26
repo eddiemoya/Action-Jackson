@@ -65,17 +65,26 @@
                 }
             }
         } else {
-            $actions = json_decode(urldecode(stripslashes($_COOKIE['actions'])), true);
+            $allActions = array();
 
-            foreach($actions as $action) {
-                $ids[] = $action->id;
+            $myActions = json_decode(urldecode(stripslashes($_COOKIE['actions'])), true);
+            $myActions = $myActions['actions'];
+
+            foreach($myActions as $action) {
+                $ids[] = $action['id'];
             }
 
-            echo '<pre>';
-            var_dump($ids);
-            exit;
+            $actions = $ajQuery->getPostAction('posts', $ids);
 
-            exit;
+            foreach($actions as $action) {
+                foreach($myActions as $myAction) {
+                    if($myAction['id'] == $action->object_id && $myAction['name'] == $action->action_type) {
+                        $allActions[] = new PostAction($action);
+                    }
+                }
+            }
+
+            $actions = $allActions;
         }
 
         foreach($posts as $post) {
@@ -123,27 +132,27 @@
             return;
         }
 
-        if ( is_user_logged_in() ) {
-            global $current_user;
+        global $current_user;
 
-            get_currentuserinfo();
+        get_currentuserinfo();
 
-            $page = (isset($_GET['paged']) && !empty($_GET['paged'])) ? $_GET['paged'] : 1;
+        foreach($comments as $comment) {
+            $ids[] = $comment->comment_ID;
+        }
 
-            foreach($comments as $comment) {
-                $ids[] = $comment->comment_ID;
-            }
+        $ajQuery = new ActionJacksonQuery();
+        $postActions = $ajQuery->getPostAction('comments', $ids, null, null, null, null, null, false);
 
-            $ajQuery = new ActionJacksonQuery();
-            $postActions = $ajQuery->getPostAction('comments', $ids, null, null, null, null, null, false);
+        $ids = array();
 
-            $actions = array();
-            $ids = array();
+        $actions = array();
+        $ids = array();
 
-            foreach($postActions as $postAction) {
-                $ids[] = $postAction->object_id;
-            }
+        foreach($postActions as $postAction) {
+            $ids[] = $postAction->object_id;
+        }
 
+        if(is_user_logged_in()) {
             $userActions = $ajQuery->getUserActions($userId, null, $ids, null, $page, 10);
 
             foreach($userActions as $userAction) {
@@ -159,18 +168,41 @@
                     }
                 }
             }
+        } else {
+            $allActions = array();
 
-            foreach($comments as $comment) {
-                if(isset($actions) && !empty($actions)) {
-                    foreach($actions as $action) {
-                        if($action->objectId == $comment->comment_ID) {
-                            $comment->actions[] = $action;
+            $myActions = json_decode(urldecode(stripslashes($_COOKIE['actions'])), true);
+            if(isset($myActions) && !empty($myActions)) {
+                $myActions = $myActions['actions'];
+
+                foreach($myActions as $action) {
+                    $ids[] = $action['id'];
+                }
+
+                $ids = array_unique($ids);
+
+                $actions = $ajQuery->getPostAction('comments', $ids);
+
+                foreach($actions as $action) {
+                    foreach($myActions as $myAction) {
+                        if($myAction['id'] == $action->object_id && $myAction['name'] == $action->action_type) {
+                            $allActions[] = new PostAction($action);
                         }
                     }
                 }
-            }
 
-            return $comments;
+                $actions = $allActions;
+            }
+        }
+
+        foreach($comments as $comment) {
+            if(isset($actions) && !empty($actions)) {
+                foreach($actions as $action) {
+                    if($action->objectId == $comment->comment_ID) {
+                        $comment->actions[] = $action;
+                    }
+                }
+            }
         }
 
         return $comments;

@@ -23,7 +23,7 @@
             $this->objectId = (int)$postAction->object_id;
             $this->objectType= $postAction->object_type;
             $this->objectSubType = $postAction->object_subtype;
-            $this->total = (int)$postAction->action_total;
+            $this->total = $postAction->action_total;
 
             $this->user = $postAction->user_id;
         }

@@ -102,7 +102,7 @@
 
         return $posts;
     }
-    add_filter('posts_results', 'getUserActionsOnPosts');
+//    add_filter('posts_results', 'getUserActionsOnPosts');
 
     function dont_suppress_filters($query){
         $query->query_vars['suppress_filters'] = false;
@@ -151,18 +151,18 @@
         $actions = array();
         $ids = array();
 
+        foreach($postActions as $action) {
+            $actions[] = new PostAction($action);
+        }
+
         foreach($postActions as $postAction) {
-            $ids[] = $postAction->object_id;
+            $ids[] = $actions->id;
         }
 
         if(is_user_logged_in()) {
             $userActions = $ajQuery->getUserActions($userId, null, $ids, null, $page, 10);
 
             if(isset($userActions) && !emptY($userActions)) {
-                foreach($userActions as $userAction) {
-                    $actions[] = new PostAction($userAction);
-                }
-
                 foreach($userActions as $userAction) {
                     foreach($actions as $action) {
                         if($current_user->ID == $action->user && $action->id == $userAction->action_id) {
@@ -175,21 +175,9 @@
             $allActions = array();
 
             $myActions = json_decode(urldecode(stripslashes($_COOKIE['actions'])), true);
+
             if(isset($myActions) && !empty($myActions)) {
                 $myActions = $myActions['actions'];
-
-                foreach($myActions as $action) {
-                    $ids[] = $action['id'];
-                }
-
-                $ids = array_unique($ids);
-
-                $actions = $ajQuery->getPostAction('comments', $ids);
-                foreach($actions as $action) {
-                    $theActions[] = new PostAction($action);
-                }
-
-                $actions = $theActions;
 
                 foreach($actions as $action) {
                     foreach($myActions as $myAction) {
@@ -214,8 +202,6 @@
         return $comments;
     }
     add_filter('the_comments', 'getMyActionsOnComments', 9);
-
-unset($_COOKIE);
 
     function action_jackson_install() {
         global $wpdb, $action_jackson_db_version;

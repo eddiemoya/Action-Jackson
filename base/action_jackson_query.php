@@ -15,7 +15,8 @@
                                     $objType,
                                     $action,
                                     $objSubType=null,
-                                    $userId=null) {
+                                    $userId=null,
+                                    $nliReset=null) {
             if((int)$objId <= 0 || is_null($objId)) {
                 Throw new Exception('You need to pass an object ID!');
             }
@@ -24,7 +25,11 @@
                 Throw new Exception('You need to pass an object type!');
             }
 
-            $actions = $this->_getUserAction($userId, $action, $objId, $objType);
+            try {
+                $actions = $this->_getUserAction($userId, $action, $objId, $objType);
+            } catch(Exception $e) {
+
+            }
 
             if(isset($actions) && !empty($actions)) {
 //              ($actionId, $objId=null, $objType=null, $objSubType=null, $action=null, $action_total=null) {
@@ -46,8 +51,19 @@
                     return 'deactivated-out';
                 }
             } else {
-                if(is_user_logged_in()) {
+                if(!is_user_logged_in() && isset($nliReset) && $nliReset != '' && $nliReset != 'null') {
+                    try {
+                        $actions = $this->getPostAction($objType, $objId, null, null, $action);
 
+                        $total = ($nliReset == 'upvote') ? $actions[0]->action_total - 1 : $actions[0]->action_total + 1;
+
+                        if($this->_updatePostAction($actions[0]->post_action_id, null, null, null, null, (string)$total)) {
+                            return 'deactivated';
+                        }
+
+                    } catch(Exception $e) {
+
+                    }
                 }
             }
 
@@ -268,6 +284,10 @@
         }
 
         private function _getUserAction($user_id, $action_type, $object_id, $object_type, $object_subtype=null) {
+            if(!isset($user_id) || $user_id <= 0) {
+                Throw new Exception('Please pass a valid user ID!');
+            }
+
             $args = get_defined_vars();
 
             $query = 'SELECT
@@ -294,6 +314,8 @@
                     $i++;
                 }
             }
+
+            echo $query.'<br/>';
 
             return $this->_wpdb->get_results($query);
         }

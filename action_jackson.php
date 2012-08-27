@@ -68,23 +68,26 @@
             $allActions = array();
 
             $myActions = json_decode(urldecode(stripslashes($_COOKIE['actions'])), true);
-            $myActions = $myActions['actions'];
 
-            foreach($myActions as $action) {
-                $ids[] = $action['id'];
-            }
+            if(isset($myActions) && !empty($actions)) {
+                $myActions = $myActions['actions'];
 
-            $actions = $ajQuery->getPostAction('posts', $ids);
+                foreach($myActions as $action) {
+                    $ids[] = $action['id'];
+                }
 
-            foreach($actions as $action) {
-                foreach($myActions as $myAction) {
-                    if($myAction['id'] == $action->object_id && $myAction['name'] == $action->action_type) {
-                        $allActions[] = new PostAction($action);
+                $actions = $ajQuery->getPostAction('posts', $ids);
+
+                foreach($actions as $action) {
+                    foreach($myActions as $myAction) {
+                        if($myAction['id'] == $action->object_id && $myAction['name'] == $action->action_type) {
+                            $allActions[] = new PostAction($action);
+                        }
                     }
                 }
-            }
 
-            $actions = $allActions;
+                $actions = $allActions;
+            }
         }
 
         foreach($posts as $post) {
@@ -113,7 +116,7 @@
         $userId = isset($current_user->ID) && $current_user->ID > 0 ? $current_user->ID : 0;
 
         $ajQuery = new ActionJacksonQuery();
-        $result = $ajQuery->addUserAction((int)$_POST['id'], $_POST['type'], $_POST['name'], $_POST['sub_type'], $userId);
+        $result = $ajQuery->addUserAction((int)$_POST['id'], $_POST['type'], $_POST['name'], $_POST['sub_type'], $userId, $_POST['nli_reset']);
 
         echo json_encode($result);
         exit;
@@ -155,11 +158,11 @@
         if(is_user_logged_in()) {
             $userActions = $ajQuery->getUserActions($userId, null, $ids, null, $page, 10);
 
-            foreach($userActions as $userAction) {
-                $actions[] = new PostAction($userAction);
-            }
-
             if(isset($userActions) && !emptY($userActions)) {
+                foreach($userActions as $userAction) {
+                    $actions[] = new PostAction($userAction);
+                }
+
                 foreach($userActions as $userAction) {
                     foreach($actions as $action) {
                         if($current_user->ID == $action->user && $action->id == $userAction->action_id) {
@@ -182,16 +185,19 @@
                 $ids = array_unique($ids);
 
                 $actions = $ajQuery->getPostAction('comments', $ids);
+                foreach($actions as $action) {
+                    $theActions[] = new PostAction($action);
+                }
+
+                $actions = $theActions;
 
                 foreach($actions as $action) {
                     foreach($myActions as $myAction) {
-                        if($myAction['id'] == $action->object_id && $myAction['name'] == $action->action_type) {
-                            $allActions[] = new PostAction($action);
+                        if($myAction['id'] == $action->objectId && $myAction['name'] == $action->action) {
+                            $action->user = (object)$myAction;
                         }
                     }
                 }
-
-                $actions = $allActions;
             }
         }
 
@@ -208,6 +214,8 @@
         return $comments;
     }
     add_filter('the_comments', 'getMyActionsOnComments', 9);
+
+unset($_COOKIE);
 
     function action_jackson_install() {
         global $wpdb, $action_jackson_db_version;

@@ -309,8 +309,6 @@
                 }
             }
 
-            echo $query.'<br/>';
-
             return $this->_wpdb->get_results($query);
         }
 

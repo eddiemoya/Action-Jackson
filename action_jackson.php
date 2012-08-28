@@ -102,7 +102,7 @@
 
         return $posts;
     }
-//    add_filter('posts_results', 'getUserActionsOnPosts');
+    add_filter('posts_results', 'getUserActionsOnPosts');
 
     function dont_suppress_filters($query){
         $query->query_vars['suppress_filters'] = false;
@@ -139,6 +139,9 @@
 
         get_currentuserinfo();
 
+        $actions = array();
+        $ids = array();
+
         foreach($comments as $comment) {
             $ids[] = $comment->comment_ID;
         }
@@ -146,17 +149,12 @@
         $ajQuery = new ActionJacksonQuery();
         $postActions = $ajQuery->getPostAction('comments', $ids, null, null, null, null, null, false);
 
-        $ids = array();
-
-        $actions = array();
-        $ids = array();
-
         foreach($postActions as $action) {
             $actions[] = new PostAction($action);
         }
 
-        foreach($postActions as $postAction) {
-            $ids[] = $actions->id;
+        foreach($actions as $action) {
+            $ids[] = $action->id;
         }
 
         if(is_user_logged_in()) {

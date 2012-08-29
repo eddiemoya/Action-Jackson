@@ -35,8 +35,6 @@
 
         foreach($posts as $post) {
             $ids[] = $post->ID;
-
-            //$actions[] = new UserActionPost($post);
         }
 
         $ajQuery = new ActionJacksonQuery();
@@ -45,6 +43,8 @@
         $ids = array();
 
         foreach($postActions as $postAction) {
+            $actions[] = new PostAction($postAction);
+
             $ids[] = $postAction->object_id;
         }
 
@@ -58,7 +58,9 @@
             if(isset($userActions) && !emptY($userActions)) {
                 foreach($userActions as $userAction) {
                     foreach($actions as $action) {
-                        if($current_user->ID == $action->user && $action->id == $userAction->action_id) {
+                        $userId = (isset($action->user) && is_object($action->user) && get_class($action->user) === 'UserAction') ? $action->user->userId : $action->user;
+
+                        if($current_user->ID == $userId && $action->id == $userAction->action_id) {
                             $action->user = new UserAction($userAction);
                         }
                     }
@@ -158,7 +160,7 @@
         }
 
         if(is_user_logged_in()) {
-            $userActions = $ajQuery->getUserActions($userId, null, $ids, null, $page, 10);
+            $userActions = $ajQuery->getUserActions($current_user->ID, null, $ids);
 
             if(isset($userActions) && !emptY($userActions)) {
                 foreach($userActions as $userAction) {

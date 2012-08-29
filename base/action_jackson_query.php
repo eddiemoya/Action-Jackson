@@ -32,7 +32,6 @@
             }
 
             if(isset($actions) && !empty($actions)) {
-//              ($actionId, $objId=null, $objType=null, $objSubType=null, $action=null, $action_total=null) {
                 $total = $actions[0]->action_total - 1;
 
                 if($this->_updatePostAction($actions[0]->post_action_id, null, null, null, null, (string)$total)) {
@@ -130,6 +129,7 @@
 
             $args = $this->_unsetNulls($args);
             $argCount = count($args);
+            $i = 0;
 
             foreach($args as $key=>$arg) {
                 if(!is_null($arg) && !empty($arg)) {
@@ -296,6 +296,7 @@
 
             $args = $this->_unsetNulls($args);
             $argCount = count($args);
+            $i = 0;
 
             foreach($args as $key=>$arg) {
                 if(!is_null($arg) && !empty($arg)) {

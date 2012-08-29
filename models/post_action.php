@@ -25,6 +25,6 @@
             $this->objectSubType = $postAction->object_subtype;
             $this->total = $postAction->action_total;
 
-            $this->user = $postAction->user_id;
+            $this->user = (isset($postAction->user_id) && !empty($postAction->user_id) && $postAction->user_id > 0 ) ? $postAction->user_id : null;
         }
     }

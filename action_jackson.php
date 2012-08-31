@@ -165,7 +165,7 @@
             if(isset($userActions) && !emptY($userActions)) {
                 foreach($userActions as $userAction) {
                     foreach($actions as $action) {
-                        if($current_user->ID == $action->user && $action->id == $userAction->action_id) {
+                        if($action->id == $userAction->action_id) {
                             $action->user = new UserAction($userAction);
                         }
                     }

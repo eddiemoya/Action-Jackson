@@ -51,7 +51,7 @@
                         $total = ($nliReset == 'deactivate') ? $actions[0]->action_total - 1 : $actions[0]->action_total + 1;
 
                         if($this->_updatePostAction($actions[0]->post_action_id, null, null, null, null, (string)$total)) {
-                            return 'deactivated';
+                            return 'deactivated-out';
                         }
 
                     } catch(Exception $e) {

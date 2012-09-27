@@ -104,7 +104,7 @@
 
         return $posts;
     }
-    add_filter('posts_results', 'getUserActionsOnPosts');
+    add_filter('the_posts', 'getUserActionsOnPosts');
 
     function dont_suppress_filters($query){
         $query->query_vars['suppress_filters'] = false;

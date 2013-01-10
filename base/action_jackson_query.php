@@ -124,7 +124,7 @@
                         JOIN
                             '.$this->_wpdb->prefix.'post_actions pa
                                 ON
-                                    ua.user_action_id=pa.post_action_id
+                                    ua.action_id=pa.post_action_id
                         WHERE ';
 
             $args = $this->_unsetNulls($args);
@@ -291,7 +291,7 @@
                         JOIN
                             '.$this->_wpdb->prefix.'post_actions pa
                                 ON
-                                    ua.user_action_id=pa.post_action_id
+                                    ua.action_id=pa.post_action_id
                         WHERE ';
 
             $args = $this->_unsetNulls($args);

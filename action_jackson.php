@@ -193,7 +193,7 @@
             if(isset($actions) && !empty($actions)) {
                 foreach($actions as $action) {
                     if($action->objectId == $comment->comment_ID) {
-                        $comment->actions[] = $action;
+                        $comment->actions[$action->action] = $action;
                     }
                 }
             }
@@ -234,3 +234,9 @@
     }
 
     register_activation_hook(__FILE__, 'action_jackson_install');
+    
+    function spitOut($txt, $n = false)
+    {
+		$flags = ($n) ? FILE_APPEND : 0;
+		file_put_contents("/tmp/out.txt", "$txt\n", $flags); 
+    }

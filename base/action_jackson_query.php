@@ -10,74 +10,61 @@
             $this->_wpdb->tables = array_merge($this->_wpdb->tables, array($this->_wpdb->prefix.'post_action', $this->_wpdb->prefix.'user_actions'));
         }
 
-        public function addUserAction(
-                                    $objId,
-                                    $objType,
-                                    $action,
-                                    $objSubType=null,
-                                    $userId=null,
-                                    $nliReset=null) {
-            if((int)$objId <= 0 || is_null($objId)) {
-                Throw new Exception('You need to pass an object ID!');
-            }
+        public function addUserAction($objId, $objType, $action, $objSubType = null, $userId = null, $nliReset = null)
+        {
+			$ret = null;
+			
+			if((int)$objId <= 0 || is_null($objId)) 
+			{
+				throw new Exception('You need to pass an object ID!');
+			}
 
-            if((string)$objType === '' || is_null($objType)) {
-                Throw new Exception('You need to pass an object type!');
-            }
+			if((string)$objType === '' || is_null($objType)) 
+			{
+				Throw new Exception('You need to pass an object type!');
+			}
 
-            try {
-                $actions = $this->_getUserAction($userId, $action, $objId, $objType);
-            } catch(Exception $e) {
+			try 
+			{
+				$actions = $this->_getUserAction($userId, $action, $objId, $objType);
+			}
+			catch(Exception $e) 
+			{
 
-            }
+			}
 
-            if(isset($actions) && !empty($actions)) {
-                $total = $actions[0]->action_total - 1;
+			if(!empty($actions)) 
+			{
+				$total = $actions[0]->action_total - 1;
 
-                if($this->_updatePostAction($actions[0]->post_action_id, null, null, null, null, (string)$total)) {
-                    if(isset($userId) && ($userId > 0 || $userId != '')) {
-                        if($this->_deleteUserAction($actions[0]->post_action_id, $userId)) {
-                            return 'deactivated';
-                        }
-                    }
+				if($this->_updatePostAction($actions[0]->post_action_id, null, null, null, null, $total)) 
+				{
+					$this->_deleteUserAction($actions[0]->post_action_id, $userId);
+					$ret = "deactivated";
+				}
+			}
+			else
+			{
+				$result = $this->_addPostAction($objId, $objType, $action, $objSubType);
+				
+				if(isset($result) && $result > 0) 
+				{
+					$args = array(
+						'user_id' => $userId,
+						'action_id' => $result,
+						'action_added' => strtotime('now')
+					);
 
-                    return 'deactivated-out';
-                }
-            } else {
-                if(!is_user_logged_in() && isset($nliReset) && $nliReset != '' && $nliReset != 'null') {
-                    try {
-                        $actions = $this->getPostAction($objType, $objId, null, null, $action);
-
-                        $total = ($nliReset == 'deactivate') ? $actions[0]->action_total - 1 : $actions[0]->action_total + 1;
-
-                        if($this->_updatePostAction($actions[0]->post_action_id, null, null, null, null, (string)$total)) {
-                            return 'deactivated-out';
-                        }
-
-                    } catch(Exception $e) {
-
-                    }
-                }
-            }
-
-            $result = $this->_addPostAction($objId, $objType, $action, $objSubType);
-            if(isset($result) && $result > 0) {
-                if(isset($userId) && ($userId > 0 || $userId != '')) {
-                    $args = array(
-                        'user_id' => $userId,
-                        'action_id' => $result,
-                        'action_added' => strtotime('now')
-                    );
-
-                    $result = $this->_wpdb->insert($this->_wpdb->prefix.'user_actions', $args);
-
-                    return 'activated';
-                }
-
-                return 'activated-out';
-            } else {
-                return false;
-            }
+					$result = $this->_wpdb->insert($this->_wpdb->prefix.'user_actions', $args);
+					$ret = "activated";
+				}
+				else
+				{
+					$ret = false;
+				}
+			}
+			
+			return $ret;
         }
 
         public function updateUserAction(
@@ -309,7 +296,7 @@
                     $i++;
                 }
             }
-
+file_put_contents("/tmp/blaha.txt", $query . "\n");
             return $this->_wpdb->get_results($query);
         }
 

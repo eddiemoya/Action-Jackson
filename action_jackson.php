@@ -112,16 +112,33 @@
     }
     add_filter('pre_get_posts', 'dont_suppress_filters');
 
-    function addUserAction() {
-        global $current_user;
+    function addUserAction() 
+    {
+		global $current_user;
+		
+        $ret = array();
         get_currentuserinfo();
-        $userId = isset($current_user->ID) && $current_user->ID > 0 ? $current_user->ID : 0;
-
-        $ajQuery = new ActionJacksonQuery();
-        $result = $ajQuery->addUserAction((int)$_POST['id'], $_POST['type'], $_POST['name'], $_POST['sub_type'], $userId, $_POST['nli_reset']);
-
-        echo json_encode($result);
-        exit;
+        
+        if(is_user_logged_in())
+        {
+			$ajQuery = new ActionJacksonQuery();
+			
+			$postId = (ctype_digit($_POST['id'])) ? $_POST['id'] : false;
+			$postType = (!empty($_POST['type'])) ? $_POST['type'] : false;
+			$postSubType = (!empty($_POST['sub_type'])) ? $_POST['sub_type'] : false;
+			$postName = (!empty($_POST['name'])) ? $_POST['name'] : false;
+			
+			if(!$postId || !$postType || !$postSubType || !$postName)
+			{
+				
+				throw new Exception("Invalid inputs");
+			}
+	file_put_contents("/tmp/blah3.txt", "Valid Inputs");		
+			$ret = $ajQuery->addUserAction((int)$postId, $postType, $postName, $postSubType, $current_user->ID);
+		}
+		
+        echo json_encode($ret);
+        exit();
     }
     add_action('wp_ajax_add_user_action', 'addUserAction');
     add_action('wp_ajax_nopriv_add_user_action', 'addUserAction');
@@ -192,8 +209,11 @@
         foreach($comments as $comment) {
             if(isset($actions) && !empty($actions)) {
                 foreach($actions as $action) {
-                    if($action->objectId == $comment->comment_ID) {
-                        $comment->actions[$action->action] = $action;
+                    if($action->objectId == $comment->comment_ID) 
+                    {
+						$afu = (is_user_logged_in() && (empty($action->user))) ? true : false;
+						$action->active_for_user = $afu;
+						$comment->actions[$action->action] = $action;
                     }
                 }
             }

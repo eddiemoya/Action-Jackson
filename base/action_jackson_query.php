@@ -296,14 +296,14 @@
                     $i++;
                 }
             }
-file_put_contents("/tmp/blaha.txt", $query . "\n");
+
             return $this->_wpdb->get_results($query);
         }
 
         private function _unsetNulls($args) {
             foreach($args as $key=>$arg) {
                 if(is_null($arg) || empty($arg)) {
-                    if($arg === "0") {
+                    if($arg === "0" || $arg === 0) {
                         continue;
                     }
 

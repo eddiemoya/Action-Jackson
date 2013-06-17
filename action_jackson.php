@@ -211,7 +211,7 @@
                 foreach($actions as $action) {
                     if($action->objectId == $comment->comment_ID) 
                     {
-						$afu = (is_user_logged_in() && (empty($action->user))) ? true : false;
+						$afu = (is_user_logged_in() && (!empty($action->user))) ? true : false;
 						$action->active_for_user = $afu;
 						$comment->actions[$action->action] = $action;
                     }

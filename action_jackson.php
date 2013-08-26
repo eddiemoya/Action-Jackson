@@ -24,7 +24,7 @@
     function getUserActionsOnPosts($posts) {
         global $current_user;
 
-        $existingIds = array();
+        $existingIds = $actions = $ids = array();
         $userId = (is_user_logged_in()) ? $current_user->ID : '0';
 
         /**
@@ -51,20 +51,46 @@
         if(is_user_logged_in()) {
             $userActions = $ajQuery->getUserActions($userId, null, $ids, null, $page, 10);
 
-            foreach($userActions as $userAction) {
-                $actions[] = new PostAction($userAction);
-            }
+            // foreach($userActions as $userAction) {
+            //     $actions[] = new PostAction($userAction);
+            // }
 
-            if(isset($userActions) && !emptY($userActions)) {
-                foreach($userActions as $userAction) {
-                    foreach($actions as $action) {
-                        $userId = (isset($action->user) && is_object($action->user) && get_class($action->user) === 'UserAction') ? $action->user->userId : $action->user;
+            // if(isset($userActions) && !emptY($userActions)) {
+            //     foreach($userActions as $userAction) {
+            //         foreach($actions as $action) {
+            //             $userId = (isset($action->user) && is_object($action->user) && get_class($action->user) === 'UserAction') ? $action->user->userId : $action->user;
 
-                        if($current_user->ID == $userId && $action->id == $userAction->action_id) {
-                            $action->user = new UserAction($userAction);
-                        }
+            //             if($current_user->ID == $userId && $action->id == $userAction->action_id) {
+            //                 $action->user = new UserAction($userAction);
+            //             }
+            //         }
+            //     }
+            // }
+
+            foreach ($actions as $action)
+            {
+                foreach ($userActions as $userAction)
+                {
+                    $userId = (isset($action->user) && is_object($action->user) && get_class($action->user) === 'UserAction') ? $action->user->userId : $action->user;
+
+                    if ($current_user->ID == $userId && $action->id == $userAction->action_id)
+                    {
+                        $action->user = new UserAction($userAction);
                     }
                 }
+            }
+
+            foreach ($userActions as $userAction)
+            {
+                $action = new PostAction($userAction);
+                $userId = (isset($action->user) && is_object($action->user) && get_class($action->user) === 'UserAction') ? $action->user->userId : $action->user;
+
+                if ($current_user->ID == $userId && $action->id == $userAction->action_id)
+                {
+                    $action->user = new UserAction($userAction);
+                }
+
+                $actions[] = $action;
             }
         } else {
             $allActions = array();
